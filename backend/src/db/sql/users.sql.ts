@@ -1,4 +1,4 @@
-import { db } from "./index";
+import { db } from "..";
 
 export const insertUser = async (email: string, hashedPwd: string) => {
   const result = await db.query(
