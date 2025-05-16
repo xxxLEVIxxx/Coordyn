@@ -7,10 +7,6 @@ export const AuthPage = () => {
   const navigate = useNavigate();
   const [isLoggingIn, setIsLoggingIn] = useState(true);
 
-  const handleLogin = () => {
-    navigate("/dashboard");
-  };
-
   const switchToSignUp = () => {
     setIsLoggingIn(false);
   };

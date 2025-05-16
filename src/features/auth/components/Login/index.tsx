@@ -29,7 +29,7 @@ export const LoginForm = ({ onSwitch }: Props) => {
   const handleSubmit = async () => {
     // send the request to the backend
     try {
-      const response = await fetch("http://localhost:3030/api/login", {
+      const response = await fetch("http://localhost:4000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

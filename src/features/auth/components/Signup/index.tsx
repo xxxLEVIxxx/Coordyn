@@ -40,7 +40,7 @@ export const SignUpForm = ({ onSwitch }: Prop) => {
     }
 
     try {
-      const response = await fetch("http://localhost:3030/api/register", {
+      const response = await fetch("http://localhost:400/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
