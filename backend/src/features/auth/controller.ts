@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { insertUser } from "../../db/sql/users.sql";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { hashPassword } from "../../utils/encryption";
+import { hashPassword, comparePassword } from "../../utils/encryption";
+import { getUserPwd } from "../../db/sql/users.sql";
 /*
 In register, we first parse the username and hashedPwd from the req body. Then we call the 
 insertUser function from the SQL commands, and then obtain the userID from this function. 
@@ -47,7 +48,32 @@ username to fetch the userId and the hashedPwd from the db. Next, we compare the
 and hashedPwd using bcrypt. If the passwords matches, we generate a JWT cookie by encrpting 
 userId into the token and then send 200 status; else, send 401 status.
 */
-export const login = async (req: Request, res: Response) => {};
+export const login = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  console.log("Received request: username $1, password $2", [
+    username,
+    password,
+  ]);
+  const result = await getUserPwd(username);
+  if (result === null) {
+    return res.status(401).send("Username does not exist");
+  }
+  console.log("result: ", result);
+  const isMatch = await comparePassword(password, result.hashedpwd);
+  const userId = result.id;
+  if (isMatch) {
+    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: "3d" });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      maxAge: 72 * 60 * 60 * 1000,
+    });
+    return res.status(200).send("Logged in");
+  } else {
+    return res.status(401).send("Invalid password");
+  }
+};
 
 /*
 In session, the token in cookie where be verified through JWT.verify with out secret key, 
