@@ -9,15 +9,15 @@ type Prop = {
 type FormData = {
   username: string;
   password: string;
-  confirmPwd: string;
 };
 
 export const SignUpForm = ({ onSwitch }: Prop) => {
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
-    confirmPwd: "",
   });
+  const [confirmPwd, setConfirmPwd] = useState("");
+
   const navigate = useNavigate();
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,18 +29,18 @@ export const SignUpForm = ({ onSwitch }: Prop) => {
   };
 
   const handleConfirmPwdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({ ...prev, confirmPwd: e.target.value }));
+    setConfirmPwd(e.target.value);
   };
 
   const handleSubmit = async () => {
     // send the request to the backend
-    if (formData.password !== formData.confirmPwd) {
+    if (formData.password !== confirmPwd) {
       alert("Passwords does not match. Please try again.");
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:400/auth/register", {
+      const response = await fetch("http://localhost:4000/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -53,7 +53,7 @@ export const SignUpForm = ({ onSwitch }: Prop) => {
       } else if (response.status == 404) {
         alert("User not found");
       } else {
-        alert("Login failed. Please try again.");
+        alert("Registeration failed. Please try again.");
       }
     } catch (err) {
       alert((err as Error).message);
@@ -96,7 +96,7 @@ export const SignUpForm = ({ onSwitch }: Prop) => {
         {/* <input type="password" id="password" name="password" /> */}
         <TextField
           label="ConfirmPassword"
-          value={formData.confirmPwd}
+          value={confirmPwd}
           onChange={handleConfirmPwdChange}
         ></TextField>
       </div>

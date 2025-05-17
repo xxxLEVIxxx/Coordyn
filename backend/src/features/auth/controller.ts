@@ -1,11 +1,45 @@
 import { Request, Response } from "express";
-
+import { insertUser } from "../../db/sql/users.sql";
+import jwt from "jsonwebtoken";
+import { hashPassword } from "../../utils/encryption";
 /*
 In register, we first parse the username and hashedPwd from the req body. Then we call the 
 insertUser function from the SQL commands, and then obtain the userID from this function. 
 Then we will generate the JWT cookie with encrypted userID as token. 
 */
-export const register = async (req: Request, res: Response) => {};
+const JWT_SECRET = "Q5zjfMbdkLoyWopFNHh3fMtwKj1v9WwHncfH5uUl2GI=";
+
+export const register = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { username, password } = req.body;
+  console.log("Received request: username $1, password $2", [
+    username,
+    password,
+  ]);
+  const hashedPwd = await hashPassword(password);
+  try {
+    const userId = await insertUser(username, hashedPwd);
+
+    if (userId !== null) {
+      const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: "3d" });
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 72 * 60 * 60 * 1000,
+      });
+      return res.status(200).send("Logged in");
+    } else {
+      return res.status(401).send("User already exists");
+    }
+  } catch (err) {
+    console.error("Registration error:", err);
+    return res.status(500).send("Internal Server Error");
+  }
+};
 
 /*
 In login, we first parse the username and password from the req body. Then we use the 
