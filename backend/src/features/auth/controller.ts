@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { insertUser } from "../../db/sql/users.sql";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { hashPassword } from "../../utils/encryption";
 /*
 In register, we first parse the username and hashedPwd from the req body. Then we call the 
@@ -55,5 +55,14 @@ then it will be decoded into userId and then verified with db to see if the user
 If it exists, we send 200 status; else, we send 401 status. 
 */
 export const session = async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Session valid", userId: "abc123" });
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send("Unauthorized: No token");
+  }
+  try {
+    jwt.verify(token, JWT_SECRET);
+    return res.status(200).send("Authorized: Token Valid");
+  } catch (err) {
+    return res.status(401).send("Unauthorized: Invalid cookie");
+  }
 };

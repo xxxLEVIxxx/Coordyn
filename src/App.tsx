@@ -11,9 +11,10 @@ function App() {
     const sessionCheck = async () => {
       try {
         const res = await fetch("http://localhost:4000/auth/session", {
+          method: "POST",
           credentials: "include",
         });
-        if (!res.ok) {
+        if (res.status !== 200) {
           navigate("/auth");
         } else {
           navigate("dashboard");
